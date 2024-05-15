@@ -49,6 +49,11 @@ resource "confluent_kafka_cluster" "cc_kafka_cluster" {
 # --------------------------------------------------------
 # Flink Compute Pool
 # --------------------------------------------------------
+data "confluent_flink_region" "cc_flink_region" {
+  cloud = var.cc_cloud_provider
+  region = var.cc_cloud_region
+}
+
 resource "confluent_flink_compute_pool" "cc_flink_compute_pool" {
   display_name = "${var.use_prefix}${var.cc_dislay_name}-${random_id.id.hex}"
   cloud        = var.cc_cloud_provider
@@ -233,9 +238,9 @@ resource "confluent_api_key" "env-manager-flink-api-key" {
   }
 
   managed_resource {
-    id          = "${var.cc_compute_pool_region}"
-    api_version = "fcpm/v2"
-    kind        = "Region"
+    id          = data.confluent_flink_region.cc_flink_region.id
+    api_version = data.confluent_flink_region.cc_flink_region.api_version
+    kind        = data.confluent_flink_region.cc_flink_region.kind
 
     environment {
       id = confluent_environment.cc_handson_env.id
